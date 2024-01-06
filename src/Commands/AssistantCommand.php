@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Eele94\Assistant\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class AssistantCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'ai-assistant';
 
     public $description = 'My command';
 
