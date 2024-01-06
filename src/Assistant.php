@@ -23,8 +23,8 @@ class Assistant
         $this->addMessage($message);
 
         $response = OpenAI::chat()->create([
-            "model"    => "gpt-3.5-turbo-1106",
-            "messages" => $this->messages,
+            'model' => 'gpt-3.5-turbo-1106',
+            'messages' => $this->messages,
         ])->choices[0]->message->content;
 
         if ($response) {
@@ -38,14 +38,15 @@ class Assistant
     {
         $this->addMessage($message);
         $response = OpenAI::chat()->create([
-            "model"    => "gpt-3.5-turbo",
-            "messages" => $this->messages,
+            'model' => 'gpt-3.5-turbo',
+            'messages' => $this->messages,
             'functions' => [
-                $function
+                $function,
             ],
         ])->choices[0];
 
         $arguments = json_decode($response->message->functionCall->arguments, true);
+
         return $arguments;
     }
 
@@ -54,7 +55,7 @@ class Assistant
         return OpenAI::audio()->speech([
             'model' => 'tts-1',
             'input' => $message,
-            'voice' => 'alloy'
+            'voice' => 'alloy',
         ]);
     }
 
@@ -71,7 +72,7 @@ class Assistant
 
         $options = array_merge([
             'prompt' => $description,
-            'model' => 'dall-e-3'
+            'model' => 'dall-e-3',
         ], $options);
 
         $url = OpenAI::images()->create($options)->data[0]->url;
@@ -84,8 +85,8 @@ class Assistant
     protected function addMessage(string $message, string $role = 'user'): self
     {
         $this->messages[] = [
-            'role'    => $role,
-            'content' => $message
+            'role' => $role,
+            'content' => $message,
         ];
 
         return $this;

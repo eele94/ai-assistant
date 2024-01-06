@@ -2,9 +2,9 @@
 
 namespace Eele94\Assistant;
 
+use Eele94\Assistant\Commands\AssistantCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Eele94\Assistant\Commands\AssistantCommand;
 
 class AssistantServiceProvider extends PackageServiceProvider
 {

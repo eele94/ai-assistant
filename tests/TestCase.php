@@ -2,9 +2,9 @@
 
 namespace Eele94\Assistant\Tests;
 
+use Eele94\Assistant\AssistantServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Eele94\Assistant\AssistantServiceProvider;
 
 class TestCase extends Orchestra
 {
