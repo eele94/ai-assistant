@@ -46,7 +46,7 @@ class Assistant
         ])->choices[0];
 
         if (app()->environment('local')) {
-            logger("Ai Assistant Function call response", [
+            logger('Ai Assistant Function call response', [
                 'response' => $response,
             ]);
         }
