@@ -34,16 +34,22 @@ class Assistant
         return $speech ? $this->speech($response) : $response;
     }
 
-    public function function(string $message, $function)
+    public function function(string $message, FunctionCall $function)
     {
         $this->addMessage($message);
         $response = OpenAI::chat()->create([
-            'model' => 'gpt-3.5-turbo-1106',
+            'model' => 'gpt-3.5-turbo-0613',
             'messages' => $this->messages,
-            'functions' => [
-                $function,
+            'tools' => [
+                [
+                    'type' => 'function',
+                    'function' => $function->serialize(),
+                ],
             ],
-        ])->choices[0];
+            'tool_choice' => 'auto',
+        ]);
+
+        $response = $response->choices[0]->message->toolCalls[0]->function->arguments;
 
         if (app()->environment('local')) {
             logger('Ai Assistant Function call response', [
