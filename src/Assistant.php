@@ -46,10 +46,15 @@ class Assistant
                     'function' => $function->serialize(),
                 ],
             ],
-            'tool_choice' => 'auto',
+            // todo: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+            // 'tool_choice' => 'auto',
+            // 'tool_choice' => [
+            //     'type' => 'function',
+            //     'function' => $function->name,
+            // ],
         ]);
 
-        $response = $response->choices[0]->message->toolCalls[0]->function->arguments;
+        $arguments = $response->choices[0]->message->toolCalls[0]->function->arguments;
 
         if (app()->environment('local')) {
             logger('Ai Assistant Function call response', [
@@ -57,7 +62,7 @@ class Assistant
             ]);
         }
 
-        $arguments = json_decode($response->message->functionCall->arguments, true);
+        $arguments = json_decode($arguments, true);
 
         return $arguments;
     }
