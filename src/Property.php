@@ -9,6 +9,7 @@ class Property
      * todo: logic for type: object
      */
     protected $enum = null;
+
     protected $items = null;
 
     public static function make(?string $key = null, ?string $description = null, mixed $type = null): static
@@ -23,12 +24,14 @@ class Property
     public function setKey(string $key): static
     {
         $this->key = $key;
+
         return $this;
     }
 
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
         return $this;
     }
 
@@ -36,18 +39,21 @@ class Property
     {
         $this->type = 'array';
         $this->items = $property;
+
         return $this;
     }
 
     public function setType(string|array $type): static
     {
         $this->type = $type;
+
         return $this;
     }
 
     public function addEnum(array $enum): static
     {
         $this->enum = $enum;
+
         return $this;
     }
 

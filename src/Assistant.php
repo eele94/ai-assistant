@@ -106,6 +106,7 @@ class Assistant
             ],
             'max_tokens' => 2000,
         ]);
+
         return $response['choices'][0]['message']['content'];
     }
 
@@ -115,14 +116,14 @@ class Assistant
 
         // Retrieve the image content
         $imageContent = file_get_contents($imageUrl);
-        throw_unless($imageContent, new Exception("Error: Unable to retrieve image content."));
+        throw_unless($imageContent, new Exception('Error: Unable to retrieve image content.'));
 
         // Create an image resource from the retrieved content
         $imageResource = imagecreatefromstring($imageContent);
-        throw_unless($imageResource, new Exception("Error: Unable to create image resource."));
+        throw_unless($imageResource, new Exception('Error: Unable to create image resource.'));
 
         // Create a temporary file path with a .png extension
-        $tempFilePath = tempnam(sys_get_temp_dir(), 'image') . '.png';
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'image').'.png';
 
         // Convert and save the image as PNG
         imagepng($imageResource, $tempFilePath);
@@ -146,7 +147,6 @@ class Assistant
 
         return $image;
     }
-
 
     public function visualize(string $description, array $options = []): string
     {

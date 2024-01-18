@@ -8,6 +8,7 @@ class ParameterBag
     {
         return new static($type, $properties, $required);
     }
+
     public function __construct(public string $type, public array $properties = [], public array $required = [])
     {
     }
@@ -22,12 +23,14 @@ class ParameterBag
     public function addProperty(Property $property): static
     {
         $this->properties[$property->key] = $property;
+
         return $this;
     }
 
     public function addRequired(string $required): static
     {
         $this->required[] = $required;
+
         return $this;
     }
 
