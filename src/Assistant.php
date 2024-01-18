@@ -2,6 +2,7 @@
 
 namespace Eele94\Assistant;
 
+use Exception;
 use OpenAI\Laravel\Facades\OpenAI;
 
 class Assistant
@@ -81,6 +82,72 @@ class Assistant
         return $this->send($message);
     }
 
+    public function vision($imageUrl)
+    {
+        $response = OpenAI::chat()->create([
+            'model' => 'gpt-4-vision-preview',
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => [
+                        [
+                            'type' => 'text',
+                            // 'text' => 'Can you describe this facebook ad?',
+                            'text' => 'This is a facebook Ad. Can you create a prompt to create a new image in the same style and characteristics?',
+                        ],
+                        [
+                            'type' => 'image_url',
+                            'image_url' => [
+                                'url' => $imageUrl,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'max_tokens' => 2000,
+        ]);
+        return $response['choices'][0]['message']['content'];
+    }
+
+    public function imageVariantion(string $message, string $imageUrl): string
+    {
+        $this->addMessage($message);
+
+        // Retrieve the image content
+        $imageContent = file_get_contents($imageUrl);
+        throw_unless($imageContent, new Exception("Error: Unable to retrieve image content."));
+
+        // Create an image resource from the retrieved content
+        $imageResource = imagecreatefromstring($imageContent);
+        throw_unless($imageResource, new Exception("Error: Unable to create image resource."));
+
+        // Create a temporary file path with a .png extension
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'image') . '.png';
+
+        // Convert and save the image as PNG
+        imagepng($imageResource, $tempFilePath);
+        imagedestroy($imageResource);
+
+        // Open the PNG file
+        $fileResource = fopen($tempFilePath, 'r');
+
+        $response = OpenAI::images()->variation([
+            'image' => $fileResource,
+            'prompt' => $message,
+            'n' => 1,
+            'size' => '1024x1024',
+            'response_format' => 'url',
+        ]);
+
+        unlink($tempFilePath);
+        $image = $response->data[0]->url;
+
+        $this->addMessage($image, 'assistant');
+
+        return $image;
+    }
+
+
     public function visualize(string $description, array $options = []): string
     {
         $this->addMessage($description);
@@ -105,6 +172,13 @@ class Assistant
             'role' => $role,
             'content' => $message,
         ];
+
+        return $this;
+    }
+
+    public function deleteHistory(): static
+    {
+        $this->messages = [];
 
         return $this;
     }
