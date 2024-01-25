@@ -34,6 +34,13 @@ class ParameterBag
         return $this;
     }
 
+    public function required(array $required): static
+    {
+        $this->required = $required;
+
+        return $this;
+    }
+
     public function removeRequired(string $required): void
     {
         $this->required = array_filter($this->required, fn ($item) => $item !== $required);
@@ -49,6 +56,7 @@ class ParameterBag
         return [
             'type' => $this->type,
             'properties' => $properties,
+            'required' => $this->required,
         ];
     }
 }
