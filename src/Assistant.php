@@ -162,7 +162,6 @@ class Assistant
         ], $options);
 
         $data = OpenAI::images()->create($options)->data;
-        info('Visualize', [$data]);
         $urls = data_get($data, '*.url', []);
 
 
