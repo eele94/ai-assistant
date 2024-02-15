@@ -123,7 +123,7 @@ class Assistant
         throw_unless($imageResource, new Exception('Error: Unable to create image resource.'));
 
         // Create a temporary file path with a .png extension
-        $tempFilePath = tempnam(sys_get_temp_dir(), 'image').'.png';
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'image') . '.png';
 
         // Convert and save the image as PNG
         imagepng($imageResource, $tempFilePath);
@@ -148,7 +148,7 @@ class Assistant
         return $image;
     }
 
-    public function visualize(string $description, array $options = []): string
+    public function visualize(string $description, array $options = []): array
     {
         $this->addMessage($description);
 
@@ -157,13 +157,18 @@ class Assistant
         $options = array_merge([
             'prompt' => $description,
             'model' => 'dall-e-3',
+            // https://platform.openai.com/docs/guides/images/usage?context=node
+            'n' => 1, // Number of images to generate is now only allowed to 1
         ], $options);
 
-        $url = OpenAI::images()->create($options)->data[0]->url;
+        $data = OpenAI::images()->create($options)->data;
+        info('Visualize', [$data]);
+        $urls = data_get($data, '*.url', []);
 
-        $this->addMessage($url, 'assistant');
 
-        return $url;
+        // $this->addMessage(collect($urls)->join(','), 'assistant');
+
+        return $urls;
     }
 
     protected function addMessage(string $message, string $role = 'user'): self
