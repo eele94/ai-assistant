@@ -35,8 +35,9 @@ class Assistant
         return $speech ? $this->speech($response) : $response;
     }
 
-    public function function(string $message, FunctionCall $function)
+    public function function(string $message, array|FunctionCall $function)
     {
+        $function = is_array($function) ? $function : $function->serialize();
         $this->addMessage($message);
         $response = OpenAI::chat()->create([
             'model' => 'gpt-3.5-turbo-0613',
@@ -44,7 +45,7 @@ class Assistant
             'tools' => [
                 [
                     'type' => 'function',
-                    'function' => $function->serialize(),
+                    'function' => $function,
                 ],
             ],
             // todo: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
@@ -123,7 +124,7 @@ class Assistant
         throw_unless($imageResource, new Exception('Error: Unable to create image resource.'));
 
         // Create a temporary file path with a .png extension
-        $tempFilePath = tempnam(sys_get_temp_dir(), 'image').'.png';
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'image') . '.png';
 
         // Convert and save the image as PNG
         imagepng($imageResource, $tempFilePath);
