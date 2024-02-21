@@ -7,8 +7,25 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 class Assistant
 {
-    public function __construct(protected array $messages = [], protected array $options = [])
+    protected array $options = [
+        'model' => 'gpt-3.5-turbo-0125',
+    ];
+
+    public function setOption(string $key, mixed $value): static
     {
+        $this->options[$key] = $value;
+
+        return $this;
+    }
+
+    public function getOption(string $key): mixed
+    {
+        return $this->options[$key];
+    }
+
+    public function __construct(protected array $messages = [], array $options = [])
+    {
+        $this->options = array_merge($this->options, $options);
         $this->messages = $messages;
     }
 
@@ -19,14 +36,44 @@ class Assistant
         return $this;
     }
 
-    public function send(string $message, bool $speech = false): ?string
+    protected function addMessage(string|array $message, string $role = 'user'): self
     {
-        $this->addMessage($message);
+        if (is_array($message)) {
+            $this->messages[] = $message;
+            return $this;
+        }
 
-        $response = OpenAI::chat()->create([
-            'model' => 'gpt-3.5-turbo-1106',
+        $this->messages[] = [
+            'role' => $role,
+            'content' => $message,
+        ];
+
+        return $this;
+    }
+
+    public function deleteHistory(): static
+    {
+        $this->messages = [];
+
+        return $this;
+    }
+
+    public function messages()
+    {
+        return $this->messages;
+    }
+
+    public function send(?string $message = null, bool $speech = false): ?string
+    {
+        if ($message) {
+            $this->addMessage($message);
+        }
+
+        $options = array_merge($this->options, [
             'messages' => $this->messages,
-        ])->choices[0]->message->content;
+        ]);
+
+        $response = OpenAI::chat()->create($options)->choices[0]->message->content;
 
         if ($response) {
             $this->addMessage($response, 'assistant');
@@ -40,7 +87,7 @@ class Assistant
         $function = is_array($function) ? $function : $function->serialize();
         $this->addMessage($message);
         $response = OpenAI::chat()->create([
-            'model' => 'gpt-3.5-turbo-0613',
+            'model' => $this->getOption('model'), // 'gpt-3.5-turbo-0613',
             'messages' => $this->messages,
             'tools' => [
                 [
@@ -83,32 +130,31 @@ class Assistant
         return $this->send($message);
     }
 
-    public function vision($imageUrl)
+    public function vision(string $imageUrl, ?string $message = null): static
     {
-        $response = OpenAI::chat()->create([
-            'model' => 'gpt-4-vision-preview',
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => [
-                        [
-                            'type' => 'text',
-                            // 'text' => 'Can you describe this facebook ad?',
-                            'text' => 'This is a facebook Ad. Can you create a prompt to create a new image in the same style and characteristics?',
-                        ],
-                        [
-                            'type' => 'image_url',
-                            'image_url' => [
-                                'url' => $imageUrl,
-                            ],
-                        ],
-                    ],
-                ],
+        $this->setOption('model', 'gpt-4-vision-preview');
+        $this->setOption('max_tokens', 2000);
+
+        $content = [];
+        if ($message) {
+            $content[] = [
+                'type' => 'text',
+                'text' => $message,
+            ];
+        }
+        $content[] = [
+            'type' => 'image_url',
+            'image_url' => [
+                'url' => $imageUrl,
             ],
-            'max_tokens' => 2000,
+        ];
+
+        $this->addMessage([
+            'role' => 'user',
+            'content' => $content,
         ]);
 
-        return $response['choices'][0]['message']['content'];
+        return $this;
     }
 
     public function imageVariantion(string $message, string $imageUrl): string
@@ -168,27 +214,5 @@ class Assistant
         // $this->addMessage(collect($urls)->join(','), 'assistant');
 
         return $urls;
-    }
-
-    protected function addMessage(string $message, string $role = 'user'): self
-    {
-        $this->messages[] = [
-            'role' => $role,
-            'content' => $message,
-        ];
-
-        return $this;
-    }
-
-    public function deleteHistory(): static
-    {
-        $this->messages = [];
-
-        return $this;
-    }
-
-    public function messages()
-    {
-        return $this->messages;
     }
 }
