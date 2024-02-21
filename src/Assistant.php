@@ -170,7 +170,7 @@ class Assistant
         throw_unless($imageResource, new Exception('Error: Unable to create image resource.'));
 
         // Create a temporary file path with a .png extension
-        $tempFilePath = tempnam(sys_get_temp_dir(), 'image') . '.png';
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'image').'.png';
 
         // Convert and save the image as PNG
         imagepng($imageResource, $tempFilePath);
