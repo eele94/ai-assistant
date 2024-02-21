@@ -40,6 +40,7 @@ class Assistant
     {
         if (is_array($message)) {
             $this->messages[] = $message;
+
             return $this;
         }
 
